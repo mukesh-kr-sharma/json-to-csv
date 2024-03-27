@@ -6,15 +6,15 @@ from fastapi.responses import StreamingResponse, HTMLResponse
 app = FastAPI()
 
 
-origins = ["*"]
+# origins = ["*"]
 
-app.add_middleware(
-    CORS,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORS,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 @app.get("/", response_class=HTMLResponse)
