@@ -1,4 +1,4 @@
-from fastapi_cors import CORS
+# from fastapi_cors import CORS
 from fastapi import FastAPI, UploadFile
 import pandas as pd
 from fastapi.responses import StreamingResponse, HTMLResponse
