@@ -1,8 +1,20 @@
+from fastapi_cors import CORS
 from fastapi import FastAPI, UploadFile
 import pandas as pd
 from fastapi.responses import StreamingResponse, HTMLResponse
 
 app = FastAPI()
+
+
+origins = ["*"]
+
+app.add_middleware(
+    CORS,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -44,5 +56,5 @@ async def json_to_csv(json_file: UploadFile):
     return StreamingResponse(
         iter([csv_bytes]),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment;filename={json_file.filename.rsplit(".")[0]}.csv"}
+        headers={"Content-Disposition": f"attachment;filename={json_file.filename.rsplit('.')[0]}.csv"}
     )
