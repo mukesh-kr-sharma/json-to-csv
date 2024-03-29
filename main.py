@@ -1,20 +1,21 @@
-# from fastapi_cors import CORS
 from fastapi import FastAPI, UploadFile
-import pandas as pd
 from fastapi.responses import StreamingResponse, HTMLResponse
+import json
+import csv
+from io import StringIO
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+origins = ["*"]
 
-# origins = ["*"]
-
-# app.add_middleware(
-#     CORS,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -49,12 +50,24 @@ def homepage():
 
 
 @app.post("/json-to-csv", response_class=StreamingResponse)
-async def json_to_csv(json_file: UploadFile):
-    df = pd.read_json(json_file.file)
-    csv_text = df.to_csv(index=False)
-    csv_bytes = csv_text.encode('utf-8')
+def json_to_csv(json_file: UploadFile):
+    json_obj = json.loads(json_file.file.read().decode('utf-8'))
+
+    csv_buffer = StringIO()
+    csv_writer = csv.writer(csv_buffer)
+
+    header = json_obj[0].keys()
+    csv_writer.writerow(header)
+
+    for item in json_obj:
+        csv_writer.writerow(item.values())
+
+    csv_data = csv_buffer.getvalue()
+    csv_buffer.close()
+
     return StreamingResponse(
-        iter([csv_bytes]),
-        media_type="text/csv",
-        headers={"Content-Disposition": f"attachment;filename={json_file.filename.rsplit('.')[0]}.csv"}
+        iter([csv_data]),
+        media_type='text/csv',
+        headers={
+            "Content-Disposition": f"attachment;filename={json_file.filename.rsplit('.')[0]}.csv"}
     )
